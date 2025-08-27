@@ -6,19 +6,17 @@ using System.Text;
 
 namespace Rampastring.Tools;
 
-#nullable enable
-
 public class IniSerializer
 {
     /// <summary>
     /// 
     /// </summary>
-    public static readonly IniSerializationOptions DefaultSerializationOptions = new() { Section = "Data", WriteEmptyKeys = true };
+    public static readonly IniSerializationOptions DefaultSerializationOptions = new() { SectionName = "Data", WriteEmptyKeys = true };
 
     /// <summary>
     /// 
     /// </summary>
-    public static readonly IniDeserializationOptions DefaultDeserializationOptions = new() { Section = "Data"};
+    public static readonly IniDeserializationOptions DefaultDeserializationOptions = new() { SectionName = "Data" };
 
     /// <summary>
     /// 
@@ -39,7 +37,7 @@ public class IniSerializer
     /// <returns></returns>
     public static object? Deserialize(IniFile ini, Type type, IniDeserializationOptions? options = null)
     {
-        IniDeserializationOptions settings = options ?? (DefaultDeserializationOptions with { Section = type.Name });
+        IniDeserializationOptions settings = options ?? (DefaultDeserializationOptions with { SectionName = type.Name });
         object ret = Activator.CreateInstance(type);
 
         foreach (var property in type.GetProperties())
@@ -48,11 +46,11 @@ public class IniSerializer
 
             object value = propertyType.Name switch
             {
-                nameof(String) => ini.GetStringValue(settings.Section, property.Name, string.Empty),
-                nameof(Boolean) => ini.GetBooleanValue(settings.Section, property.Name, false),
-                nameof(Int32) => ini.GetIntValue(settings.Section, property.Name, 0),
-                nameof(Single) => ini.GetSingleValue(settings.Section, property.Name, (float)0.0),
-                nameof(Double) => ini.GetDoubleValue(settings.Section, property.Name, 0.0),
+                nameof(String) => ini.GetStringValue(settings.SectionName, property.Name, string.Empty),
+                nameof(Boolean) => ini.GetBooleanValue(settings.SectionName, property.Name, false),
+                nameof(Int32) => ini.GetIntValue(settings.SectionName, property.Name, 0),
+                nameof(Single) => ini.GetSingleValue(settings.SectionName, property.Name, (float)0.0),
+                nameof(Double) => ini.GetDoubleValue(settings.SectionName, property.Name, 0.0),
                 //nameof(List<String>) => ini.GetListValue<string>(settings.Section, property.Name, new char[',']),
                 _ => throw new InvalidOperationException()
             };
@@ -73,7 +71,7 @@ public class IniSerializer
     public static string Serialize<T>(T data,  IniSerializationOptions? options = null) => Serialize(data, typeof(T), options);
 
     /// <summary>
-    /// 
+    /// Serializes class to ini-formated string.
     /// </summary>
     /// <param name="data"></param>
     /// <param name="type"></param>
@@ -81,13 +79,16 @@ public class IniSerializer
     /// <returns></returns>
     public static string Serialize(object data, Type type, IniSerializationOptions? options = null)
     {
-        IniSerializationOptions settings = options ?? (DefaultSerializationOptions with { Section = type.Name });
+        IniSerializationOptions settings = options ?? (DefaultSerializationOptions with { SectionName = type.Name });
 
         StringBuilder ret = new();
-        ret.AppendLine($"[{type.Name}]");
+        ret.AppendLine($"[{settings.SectionName}]");
 
         foreach (var property in type.GetProperties())
         {
+            if (settings.IgnoreProperties.Contains(property.Name))
+                continue;
+
             var propertyType = property.GetType();
             var propertyValue = property.GetValue(data);
 
@@ -99,5 +100,4 @@ public class IniSerializer
 
         return ret.ToString();
     }
-
 }
