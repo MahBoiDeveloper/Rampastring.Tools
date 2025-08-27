@@ -90,15 +90,11 @@ public class IniSerializer
         {
             var propertyType = property.GetType();
             var propertyValue = property.GetValue(data);
-            
-            if (propertyValue == null)
-            {
-                continue;
-            }
-            {
-                ret.AppendLine($"{property.Name}={propertyValue.ToString()}");
-            }
 
+            if (!settings.WriteEmptyKeys && propertyValue == null)
+                continue;
+
+            ret.AppendLine($"{property.Name}={(propertyValue ?? string.Empty).ToString()}");
         }
 
         return ret.ToString();
