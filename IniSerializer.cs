@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rampastring.Tools.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime;
@@ -30,9 +31,21 @@ public class IniSerializer
 
     #region Deserialization
     /// <summary>
+    /// Deserializes string as ini file to the object of the specific class.
+    /// </summary>
+    public static T? Deserialize<T>(string iniFileContent, IniDeserializationOptions? options = null)
+        => (T)Deserialize(new IniFile(iniFileContent.ToStream()), typeof(T), options);
+
+    /// <summary>
+    /// Deserializes string as ini file to the object of the specific class.
+    /// </summary>
+    public static object? Deserialize(string iniFileContent, Type type, IniDeserializationOptions? options = null)
+        => Deserialize(new IniFile(iniFileContent.ToStream()), type, options);
+
+    /// <summary>
     /// Deserializes ini file to the object of the specific class.
     /// </summary>
-    public static T? Deserialize<T>(IniFile ini, IniDeserializationOptions? options = null) 
+    public static T? Deserialize<T>(IniFile ini, IniDeserializationOptions? options = null)
         => (T)Deserialize(ini, typeof(T), options);
 
     /// <summary>
@@ -41,6 +54,11 @@ public class IniSerializer
     public static object? Deserialize(IniFile ini, Type type, IniDeserializationOptions? options = null)
     {
         IniDeserializationOptions settings = options ?? (DefaultDeserializationOptions with { SectionName = type.Name });
+
+        var section = ini.GetSection(settings.SectionName);
+
+        if (section == null)
+            throw new IniSerializerException($"Unable to find \"{settings.SectionName}\" section in provided ini file instance.");
 
         return DeserializeSection(ini.GetSection(settings.SectionName), type, settings);
     }
@@ -54,7 +72,7 @@ public class IniSerializer
     /// <summary>
     /// Deserializes ini section to the object of the specific class.
     /// </summary>
-    public static object? Deserialize(IniSection section, Type type, IniDeserializationOptions options) 
+    public static object? Deserialize(IniSection section, Type type, IniDeserializationOptions options)
         => DeserializeSection(section, type, options);
 
     private static object? DeserializeSection(IniSection section, Type type, IniDeserializationOptions? options)
@@ -71,16 +89,14 @@ public class IniSerializer
             if (settings.SkipEmptyKeys && string.IsNullOrEmpty(section.GetStringValue(property.Name, string.Empty)))
                 continue;
 
-            var propertyType = property.GetType();
-
-            object value = propertyType.Name switch
+            object value = property.PropertyType.Name switch
             {
                 nameof(String) => section.GetStringValue(property.Name, string.Empty),
                 nameof(Boolean) => section.GetBooleanValue(property.Name, false),
                 nameof(Int32) => section.GetIntValue(property.Name, 0),
                 nameof(Single) => section.GetSingleValue(property.Name, (float)0.0),
                 nameof(Double) => section.GetDoubleValue(property.Name, 0.0),
-                _ => throw new IniSerializerException($"Unable to serialize property type {propertyType.Name} " +
+                _ => throw new IniSerializerException($"Unable to serialize property type {property.PropertyType.Name} " +
                 $"for property {property.Name} from section {settings.SectionName}")
             };
 
@@ -99,7 +115,7 @@ public class IniSerializer
     /// <param name="data"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    public static string Serialize<T>(T data,  IniSerializationOptions? options = null) => Serialize(data, typeof(T), options);
+    public static string Serialize<T>(T data, IniSerializationOptions? options = null) => Serialize(data, typeof(T), options);
 
     /// <summary>
     /// Serializes class to ini-formated string.
