@@ -9,50 +9,79 @@ namespace Rampastring.Tools;
 public class IniSerializer
 {
     /// <summary>
-    /// 
+    /// Default options used in serialization.
     /// </summary>
-    public static readonly IniSerializationOptions DefaultSerializationOptions = new() { SectionName = "Data", WriteEmptyKeys = true };
+    public static readonly IniSerializationOptions DefaultSerializationOptions = new()
+    {
+        SectionName = "Data",
+        IgnoreProperties = [],
+        WriteEmptyKeys = true
+    };
 
     /// <summary>
-    /// 
+    /// Default options used in deserialization.
     /// </summary>
-    public static readonly IniDeserializationOptions DefaultDeserializationOptions = new() { SectionName = "Data" };
+    public static readonly IniDeserializationOptions DefaultDeserializationOptions = new()
+    {
+        SectionName = "Data",
+        IgnoreProperties = [],
+        SkipEmptyKeys = true
+    };
+
+    #region Deserialization
+    /// <summary>
+    /// Deserializes ini file to the object of the specific class.
+    /// </summary>
+    public static T? Deserialize<T>(IniFile ini, IniDeserializationOptions? options = null) 
+        => (T)Deserialize(ini, typeof(T), options);
 
     /// <summary>
-    /// 
+    /// Deserializes ini file to the object of the specific class.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="ini"></param>
-    /// <param name="options"></param>
-    /// <returns></returns>
-    public static T? Deserialize<T>(IniFile ini, IniDeserializationOptions? options = null) => (T)Deserialize(ini, typeof(T), options);
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ini"></param>
-    /// <param name="type"></param>
-    /// <param name="options"></param>
-    /// <returns></returns>
     public static object? Deserialize(IniFile ini, Type type, IniDeserializationOptions? options = null)
     {
         IniDeserializationOptions settings = options ?? (DefaultDeserializationOptions with { SectionName = type.Name });
+
+        return DeserializeSection(ini.GetSection(settings.SectionName), type, settings);
+    }
+
+    /// <summary>
+    /// Deserializes ini section to the object of the specific class.
+    /// </summary>
+    public static T? Deserialize<T>(IniSection section, IniDeserializationOptions? options = null)
+        => (T)DeserializeSection(section, typeof(T), options);
+
+    /// <summary>
+    /// Deserializes ini section to the object of the specific class.
+    /// </summary>
+    public static object? Deserialize(IniSection section, Type type, IniDeserializationOptions options) 
+        => DeserializeSection(section, type, options);
+
+    private static object? DeserializeSection(IniSection section, Type type, IniDeserializationOptions? options)
+    {
+        var settings = options ?? DefaultDeserializationOptions;
+
         object ret = Activator.CreateInstance(type);
 
         foreach (var property in type.GetProperties())
         {
+            if (settings.IgnoreProperties.Contains(property.Name))
+                continue;
+
+            if (settings.SkipEmptyKeys && string.IsNullOrEmpty(section.GetStringValue(property.Name, string.Empty)))
+                continue;
+
             var propertyType = property.GetType();
 
             object value = propertyType.Name switch
             {
-                nameof(String) => ini.GetStringValue(settings.SectionName, property.Name, string.Empty),
-                nameof(Boolean) => ini.GetBooleanValue(settings.SectionName, property.Name, false),
-                nameof(Int32) => ini.GetIntValue(settings.SectionName, property.Name, 0),
-                nameof(Single) => ini.GetSingleValue(settings.SectionName, property.Name, (float)0.0),
-                nameof(Double) => ini.GetDoubleValue(settings.SectionName, property.Name, 0.0),
-                //nameof(List<String>) => ini.GetListValue<string>(settings.Section, property.Name, new char[',']),
-                _ => throw new InvalidOperationException()
+                nameof(String) => section.GetStringValue(property.Name, string.Empty),
+                nameof(Boolean) => section.GetBooleanValue(property.Name, false),
+                nameof(Int32) => section.GetIntValue(property.Name, 0),
+                nameof(Single) => section.GetSingleValue(property.Name, (float)0.0),
+                nameof(Double) => section.GetDoubleValue(property.Name, 0.0),
+                _ => throw new IniSerializerException($"Unable to serialize property type {propertyType.Name} " +
+                $"for property {property.Name} from section {settings.SectionName}")
             };
 
             property.SetValue(ret, value);
@@ -60,9 +89,11 @@ public class IniSerializer
 
         return ret;
     }
+    #endregion
 
+    #region Serialization
     /// <summary>
-    /// 
+    /// Serializes class to ini-formated string.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="data"></param>
@@ -100,4 +131,5 @@ public class IniSerializer
 
         return ret.ToString();
     }
+    #endregion
 }
