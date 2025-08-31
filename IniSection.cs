@@ -147,15 +147,7 @@ public class IniSection : IIniSection
     /// <returns></returns>
     public object GetValue(string key, Type type)
     {
-        return type.Name switch
-        {
-            nameof(String) => GetStringValue(key, string.Empty),
-            nameof(Boolean) => GetBooleanValue(key, false),
-            nameof(Int32) => GetIntValue(key, 0),
-            nameof(Single) => GetSingleValue(key, (float)0.0),
-            nameof(Double) => GetDoubleValue(key, 0.0),
-            _ => throw new ArgumentException($"Unable to get value of type {type.Name}.")
-        };
+        return Conversions.ValueFromString(GetStringValue(key, string.Empty), type);
     }
 
     /// <summary>

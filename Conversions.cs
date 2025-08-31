@@ -14,16 +14,57 @@ public static class Conversions
     /// <typeparam name="T"></typeparam>
     /// <param name="str"></param>
     /// <param name="defaultValue"></param>
-    /// <returns></returns>
-    public static T FromString<T>(string str, T defaultValue)
+    /// <returns>A value of the type T.</returns>
+    public static T ValueFromString<T>(string str, T defaultValue)
     {
-        return typeof(T).Name switch
+        return (T)ValueFromString(str, typeof(T), defaultValue);
+    }
+
+    /// <summary>
+    /// Converts a string to the specific type.
+    /// </summary>
+    /// <param name="str"></param>
+    /// <param name="type"></param>
+    /// <param name="defaultValue"></param>
+    /// <returns>A value of the specific type.</returns>
+    public static object ValueFromString(string str, Type type, object defaultValue)
+    {
+        return type.Name switch
         {
-            nameof(Boolean) => (T)(object)BooleanFromString(str, (Boolean)(object)defaultValue),
-            nameof(Int32) => (T)(object)IntFromString(str, (Int32)(object)defaultValue),
-            nameof(Single) => (T)(object)FloatFromString(str, (Single)(object)defaultValue),
-            nameof(Double) => (T)(object)DoubleFromString(str, (Double)(object)defaultValue),
-            _ => throw new ArgumentException($"Unable to get value of type {typeof(T).Name}.")
+            nameof(Boolean) => BooleanFromString(str, (Boolean)defaultValue),
+            nameof(Int32) => IntFromString(str, (Int32)defaultValue),
+            nameof(Single) => FloatFromString(str, (Single)defaultValue),
+            nameof(Double) => DoubleFromString(str, (Double)defaultValue),
+            _ => throw new ArgumentException($"Unable to get value of type {type.Name}.")
+        };
+    }
+
+    /// <summary>
+    /// Converts a string to the specific type.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="str"></param>
+    /// <returns>A value of the type T.</returns>
+    public static T ValueFromString<T>(string str)
+    {
+        return (T)ValueFromString(str, typeof(T));
+    }
+
+    /// <summary>
+    /// Converts a string to the specific type.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="str"></param>
+    /// <returns>A value of the specific type.</returns>
+    public static object ValueFromString(string str, Type type)
+    {
+        return type.Name switch
+        {
+            nameof(Boolean) => BooleanFromString(str),
+            nameof(Int32) => IntFromString(str),
+            nameof(Single) => FloatFromString(str),
+            nameof(Double) => DoubleFromString(str),
+            _ => throw new ArgumentException($"Unable to get value of type {type.Name}.")
         };
     }
 
@@ -33,7 +74,7 @@ public static class Conversions
     /// <param name="str">The string to convert.</param>
     /// <param name="defaultValue">The default value to return if the conversion fails.</param>
     /// <returns>A boolean based on the given string.</returns>
-    public static bool BooleanFromString(string str, bool defaultValue)
+    public static bool BooleanFromString(string str, bool defaultValue = false)
     {
         if (string.IsNullOrEmpty(str))
             return defaultValue;
@@ -102,7 +143,7 @@ public static class Conversions
     /// <param name="str">The string to convert.</param>
     /// <param name="defaultValue">The default value to return if the conversion fails.</param>
     /// <returns>A float based on the given string.</returns>
-    public static float FloatFromString(string str, float defaultValue)
+    public static float FloatFromString(string str, float defaultValue = (float)0.0)
     {
         if (string.IsNullOrEmpty(str))
             return defaultValue;
@@ -123,7 +164,7 @@ public static class Conversions
     /// <param name="str">The string to convert.</param>
     /// <param name="defaultValue">The default value to return if the conversion fails.</param>
     /// <returns>A double based on the given string.</returns>
-    public static double DoubleFromString(string str, double defaultValue)
+    public static double DoubleFromString(string str, double defaultValue = 0.0)
     {
         if (string.IsNullOrEmpty(str))
             return defaultValue;
@@ -144,7 +185,7 @@ public static class Conversions
     /// <param name="str">The string to convert.</param>
     /// <param name="defaultValue">The default value to return if the conversion fails.</param>
     /// <returns>An integer based on the given string.</returns>
-    public static int IntFromString(string str, int defaultValue)
+    public static int IntFromString(string str, int defaultValue = 0)
     {
         // In theory the "if" here is useless, but having it here
         // makes the code run 100+ times faster for null / empty strings.

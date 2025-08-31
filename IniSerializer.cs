@@ -26,6 +26,7 @@ public class IniSerializer
     {
         SectionName = "Data",
         IgnoreProperties = [],
+        SkipUnableToParseTypes = true,
         SkipEmptyKeys = true
     };
 
@@ -89,18 +90,17 @@ public class IniSerializer
             if (settings.SkipEmptyKeys && string.IsNullOrEmpty(section.GetStringValue(property.Name, string.Empty)))
                 continue;
 
-            object value = property.PropertyType.Name switch
+            try
             {
-                nameof(String) => section.GetStringValue(property.Name, string.Empty),
-                nameof(Boolean) => section.GetBooleanValue(property.Name, false),
-                nameof(Int32) => section.GetIntValue(property.Name, 0),
-                nameof(Single) => section.GetSingleValue(property.Name, (float)0.0),
-                nameof(Double) => section.GetDoubleValue(property.Name, 0.0),
-                _ => throw new IniSerializerException($"Unable to serialize property type {property.PropertyType.Name} " +
-                $"for property {property.Name} from section {settings.SectionName}")
-            };
-
-            property.SetValue(ret, value);
+                property.SetValue(ret, section.GetValue(property.Name, type));
+            }
+            catch (ArgumentException ex)
+            {
+                if (settings.SkipUnableToParseTypes)
+                    continue;
+                else
+                    throw ex;
+            }
         }
 
         return ret;
