@@ -9,6 +9,25 @@ namespace Rampastring.Tools;
 public static class Conversions
 {
     /// <summary>
+    /// Converts a string to the specific type.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="str"></param>
+    /// <param name="defaultValue"></param>
+    /// <returns></returns>
+    public static T FromString<T>(string str, T defaultValue)
+    {
+        return typeof(T).Name switch
+        {
+            nameof(Boolean) => (T)(object)BooleanFromString(str, (Boolean)(object)defaultValue),
+            nameof(Int32) => (T)(object)IntFromString(str, (Int32)(object)defaultValue),
+            nameof(Single) => (T)(object)FloatFromString(str, (Single)(object)defaultValue),
+            nameof(Double) => (T)(object)DoubleFromString(str, (Double)(object)defaultValue),
+            _ => throw new ArgumentException($"Unable to get value of type {typeof(T).Name}.")
+        };
+    }
+
+    /// <summary>
     /// Converts a string to a boolean.
     /// </summary>
     /// <param name="str">The string to convert.</param>

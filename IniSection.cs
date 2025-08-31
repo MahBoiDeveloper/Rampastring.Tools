@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime;
 
 namespace Rampastring.Tools;
 
@@ -128,6 +129,36 @@ public class IniSection : IIniSection
     }
 
     /// <summary>
+    /// Returns a value from the INI section.
+    /// </summary>
+    /// <param name="key">The name of the INI key.</param>
+    /// <param name="type">The type of the value.</param>
+    /// <returns></returns>
+    public T GetValue<T>(string key)
+    {
+        return (T)GetValue(key, typeof(T));
+    }
+
+    /// <summary>
+    /// Returns a value from the INI section.
+    /// </summary>
+    /// <param name="key">The name of the INI key.</param>
+    /// <param name="type">The type of the value.</param>
+    /// <returns></returns>
+    public object GetValue(string key, Type type)
+    {
+        return type.Name switch
+        {
+            nameof(String) => GetStringValue(key, string.Empty),
+            nameof(Boolean) => GetBooleanValue(key, false),
+            nameof(Int32) => GetIntValue(key, 0),
+            nameof(Single) => GetSingleValue(key, (float)0.0),
+            nameof(Double) => GetDoubleValue(key, 0.0),
+            _ => throw new ArgumentException($"Unable to get value of type {type.Name}.")
+        };
+    }
+
+    /// <summary>
     /// Sets the string value of a key in the INI section.
     /// If the key doesn't exist, it is created.
     /// </summary>
@@ -221,6 +252,46 @@ public class IniSection : IIniSection
     public void SetListValue<T>(string key, List<T> list, char separator)
     {
         AddOrReplaceKey(key, string.Join(separator.ToString(), list));
+    }
+
+    /// <summary>
+    /// Sets the value of the specific type.
+    /// </summary>
+    /// <param name="key">The name of the INI key.</param>
+    /// <param name="value">The value of the INI key.</param>
+    public void SetValue<T>(string key, object value)
+    {
+        SetValue(key, value, typeof(T));
+    }
+
+    /// <summary>
+    /// Sets the value of the specific type.
+    /// </summary>
+    /// <param name="key">The name of the INI key.</param>
+    /// <param name="value">The value of the INI key.</param>
+    /// <param name="type">The type of the INI key.</param>
+    public void SetValue(string key, object value, Type type)
+    {
+        switch (type.Name)
+        {
+            case (nameof(String)):
+                SetStringValue(key, (String)(object)value);
+                break;
+            case (nameof(Boolean)):
+                SetBooleanValue(key, (Boolean)(object)value);
+                break;
+            case (nameof(Int32)):
+                SetIntValue(key, (Int32)(object)value);
+                break;
+            case (nameof(Single)):
+                SetDoubleValue(key, (Single)(object)value);
+                break;
+            case (nameof(Double)):
+                SetDoubleValue(key, (Double)(object)value);
+                break;
+            default:
+                throw new ArgumentException($"Unable to get value of type {type.Name}.");
+        }
     }
 
     /// <summary>
