@@ -94,6 +94,14 @@ public interface IIniSection
     string GetStringValue(string key, string defaultValue);
 
     /// <summary>
+    /// Returns a value from the INI section.
+    /// </summary>
+    /// <param name="key">The name of the INI key.</param>
+    /// <param name="type">The type of the value.</param>
+    /// <returns></returns>
+    object GetValue(string key, Type type);
+
+    /// <summary>
     /// Checks if the specified INI key exists in this section.
     /// </summary>
     /// <param name="key">The INI key.</param>
@@ -150,6 +158,14 @@ public interface IIniSection
     /// <param name="key">The name of the INI key.</param>
     /// <param name="value">The value of the INI key.</param>
     void SetStringValue(string key, string value);
+
+    /// <summary>
+    /// Sets the value of the specific type.
+    /// </summary>
+    /// <param name="key">The name of the INI key.</param>
+    /// <param name="value">The value of the INI key.</param>
+    /// <param name="type">The type of the INI key.</param>
+    void SetValue(string key, object value, Type type);
 
     /// <summary>
     /// Parses and returns a path string from the INI section.
