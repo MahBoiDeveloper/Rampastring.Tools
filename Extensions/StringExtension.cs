@@ -8,10 +8,13 @@ using System.Threading.Tasks;
 namespace Rampastring.Tools.Extensions;
 
 /// <summary>
-/// 
+/// Extends <see cref="System.String"/> class.
 /// </summary>
 public static class StringExtension
 {
+    /// <summary>
+    /// Creates <see cref="MemoryStream"/> from string.
+    /// </summary>
     public static Stream ToStream(this string text)
     {
         // https://stackoverflow.com/questions/1879395/how-do-i-generate-a-stream-from-a-string
