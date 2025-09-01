@@ -6,7 +6,7 @@ namespace Rampastring.Tools;
 /// <summary>
 /// Provides static methods for converting data types.
 /// </summary>
-public class Conversions
+public class Conversions : IConversions
 {
     /// <summary>
     /// Converts a string to the specific type.
@@ -45,7 +45,7 @@ public class Conversions
     /// <typeparam name="T"></typeparam>
     /// <param name="str"></param>
     /// <returns>A value of the type T.</returns>
-    public static T ValueFromString<T>(string str)
+    public T ValueFromString<T>(string str)
     {
         return (T)ValueFromString(str, typeof(T));
     }
@@ -56,7 +56,7 @@ public class Conversions
     /// <param name="type"></param>
     /// <param name="str"></param>
     /// <returns>A value of the specific type.</returns>
-    public static object ValueFromString(string str, Type type)
+    public object ValueFromString(string str, Type type)
     {
         return type.Name switch
         {

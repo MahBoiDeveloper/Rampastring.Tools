@@ -7,8 +7,13 @@ using System.Text;
 
 namespace Rampastring.Tools;
 
-public class IniSerializer
+/// <summary>
+/// Provides functionality to serialize objects or value types to INI and to deserialize INI into objects or value types.
+/// </summary>
+public class IniSerializer(IConversions converter)
 {
+    private readonly IConversions converter;
+
     /// <summary>
     /// Default options used in serialization.
     /// </summary>
@@ -34,25 +39,25 @@ public class IniSerializer
     /// <summary>
     /// Deserializes string as ini file to the object of the specific class.
     /// </summary>
-    public static T? Deserialize<T>(string iniFileContent, IniDeserializationOptions? options = null)
+    public T? Deserialize<T>(string iniFileContent, IniDeserializationOptions? options = null)
         => (T)Deserialize(new IniFile(iniFileContent.ToStream()), typeof(T), options);
 
     /// <summary>
     /// Deserializes string as ini file to the object of the specific class.
     /// </summary>
-    public static object? Deserialize(string iniFileContent, Type type, IniDeserializationOptions? options = null)
+    public object? Deserialize(string iniFileContent, Type type, IniDeserializationOptions? options = null)
         => Deserialize(new IniFile(iniFileContent.ToStream()), type, options);
 
     /// <summary>
     /// Deserializes ini file to the object of the specific class.
     /// </summary>
-    public static T? Deserialize<T>(IniFile ini, IniDeserializationOptions? options = null)
+    public T? Deserialize<T>(IniFile ini, IniDeserializationOptions? options = null)
         => (T)Deserialize(ini, typeof(T), options);
 
     /// <summary>
     /// Deserializes ini file to the object of the specific class.
     /// </summary>
-    public static object? Deserialize(IniFile ini, Type type, IniDeserializationOptions? options = null)
+    public object? Deserialize(IniFile ini, Type type, IniDeserializationOptions? options = null)
     {
         IniDeserializationOptions settings = options ?? (DefaultDeserializationOptions with { SectionName = type.Name });
 
@@ -67,16 +72,16 @@ public class IniSerializer
     /// <summary>
     /// Deserializes ini section to the object of the specific class.
     /// </summary>
-    public static T? Deserialize<T>(IniSection section, IniDeserializationOptions? options = null)
+    public T? Deserialize<T>(IniSection section, IniDeserializationOptions? options = null)
         => (T)DeserializeSection(section, typeof(T), options);
 
     /// <summary>
     /// Deserializes ini section to the object of the specific class.
     /// </summary>
-    public static object? Deserialize(IniSection section, Type type, IniDeserializationOptions options)
+    public object? Deserialize(IniSection section, Type type, IniDeserializationOptions options)
         => DeserializeSection(section, type, options);
 
-    private static object? DeserializeSection(IniSection section, Type type, IniDeserializationOptions? options)
+    private object? DeserializeSection(IniSection section, Type type, IniDeserializationOptions? options)
     {
         var settings = options ?? DefaultDeserializationOptions;
 
@@ -87,12 +92,14 @@ public class IniSerializer
             if (settings.IgnoreProperties.Contains(property.Name))
                 continue;
 
-            if (settings.SkipEmptyKeys && string.IsNullOrEmpty(section.GetStringValue(property.Name, string.Empty)))
+            string value = section.GetStringValue(property.Name, string.Empty);
+
+            if (settings.SkipEmptyKeys && string.IsNullOrEmpty(value))
                 continue;
 
             try
             {
-                property.SetValue(ret, section.GetValue(property.Name, type));
+                property.SetValue(ret, converter.ValueFromString(value, type));
             }
             catch (ArgumentException ex)
             {
@@ -115,7 +122,7 @@ public class IniSerializer
     /// <param name="data"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    public static string Serialize<T>(T data, IniSerializationOptions? options = null) => Serialize(data, typeof(T), options);
+    public string Serialize<T>(T data, IniSerializationOptions? options = null) => Serialize(data, typeof(T), options);
 
     /// <summary>
     /// Serializes class to ini-formated string.
@@ -124,7 +131,7 @@ public class IniSerializer
     /// <param name="type"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    public static string Serialize(object data, Type type, IniSerializationOptions? options = null)
+    public string Serialize(object data, Type type, IniSerializationOptions? options = null)
     {
         IniSerializationOptions settings = options ?? (DefaultSerializationOptions with { SectionName = type.Name });
 
