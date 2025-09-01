@@ -60,6 +60,7 @@ public class Conversions : IConversions
     {
         return type.Name switch
         {
+            nameof(String) => str,
             nameof(Boolean) => BooleanFromString(str),
             nameof(Int32) => IntFromString(str),
             nameof(Single) => FloatFromString(str),
