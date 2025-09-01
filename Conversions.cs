@@ -6,7 +6,7 @@ namespace Rampastring.Tools;
 /// <summary>
 /// Provides static methods for converting data types.
 /// </summary>
-public static class Conversions
+public class Conversions
 {
     /// <summary>
     /// Converts a string to the specific type.
@@ -53,7 +53,7 @@ public static class Conversions
     /// <summary>
     /// Converts a string to the specific type.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <param name="type"></param>
     /// <param name="str"></param>
     /// <returns>A value of the specific type.</returns>
     public static object ValueFromString(string str, Type type)
