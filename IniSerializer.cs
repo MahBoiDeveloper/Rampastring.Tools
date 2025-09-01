@@ -12,8 +12,6 @@ namespace Rampastring.Tools;
 /// </summary>
 public class IniSerializer(IConversions converter)
 {
-    private readonly IConversions converter;
-
     /// <summary>
     /// Default options used in serialization.
     /// </summary>
