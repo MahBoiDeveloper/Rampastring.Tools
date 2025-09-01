@@ -31,6 +31,7 @@ public class Conversions : IConversions
     {
         return type.Name switch
         {
+            nameof(String) => str,
             nameof(Boolean) => BooleanFromString(str, (Boolean)defaultValue),
             nameof(Int32) => IntFromString(str, (Int32)defaultValue),
             nameof(Single) => FloatFromString(str, (Single)defaultValue),
@@ -53,10 +54,10 @@ public class Conversions : IConversions
     /// <summary>
     /// Converts a string to the specific type.
     /// </summary>
-    /// <param name="type"></param>
-    /// <param name="str"></param>
+    /// <param name="type">Output value type,</param>
+    /// <param name="str">String to parse as specific type.</param>
     /// <returns>A value of the specific type.</returns>
-    public object ValueFromString(string str, Type type)
+    public virtual object ValueFromString(string str, Type type)
     {
         return type.Name switch
         {
