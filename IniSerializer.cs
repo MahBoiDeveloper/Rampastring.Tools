@@ -97,7 +97,7 @@ public class IniSerializer(IConversions converter)
 
             try
             {
-                property.SetValue(ret, converter.ValueFromString(value, type));
+                property.SetValue(ret, converter.ValueFromString(value, property.PropertyType));
             }
             catch (ArgumentException ex)
             {
