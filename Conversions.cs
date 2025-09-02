@@ -6,7 +6,7 @@ namespace Rampastring.Tools;
 /// <summary>
 /// Provides static methods for converting data types.
 /// </summary>
-public static class Conversions
+public class Conversions : IConversions
 {
     /// <summary>
     /// Converts a string to the specific type.
@@ -31,6 +31,7 @@ public static class Conversions
     {
         return type.Name switch
         {
+            nameof(String) => str,
             nameof(Boolean) => BooleanFromString(str, (Boolean)defaultValue),
             nameof(Int32) => IntFromString(str, (Int32)defaultValue),
             nameof(Single) => FloatFromString(str, (Single)defaultValue),
@@ -45,7 +46,7 @@ public static class Conversions
     /// <typeparam name="T"></typeparam>
     /// <param name="str"></param>
     /// <returns>A value of the type T.</returns>
-    public static T ValueFromString<T>(string str)
+    public T ValueFromString<T>(string str)
     {
         return (T)ValueFromString(str, typeof(T));
     }
@@ -53,13 +54,14 @@ public static class Conversions
     /// <summary>
     /// Converts a string to the specific type.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="str"></param>
+    /// <param name="type">Output value type,</param>
+    /// <param name="str">String to parse as specific type.</param>
     /// <returns>A value of the specific type.</returns>
-    public static object ValueFromString(string str, Type type)
+    public virtual object ValueFromString(string str, Type type)
     {
         return type.Name switch
         {
+            nameof(String) => str,
             nameof(Boolean) => BooleanFromString(str),
             nameof(Int32) => IntFromString(str),
             nameof(Single) => FloatFromString(str),
