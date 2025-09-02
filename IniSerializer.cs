@@ -1,9 +1,7 @@
-﻿using Rampastring.Tools.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Runtime;
+﻿using System;
 using System.Text;
+
+using Rampastring.Tools.Extensions;
 
 namespace Rampastring.Tools;
 
@@ -37,25 +35,31 @@ public class IniSerializer(IConversions converter)
     /// <summary>
     /// Deserializes string as ini file to the object of the specific class.
     /// </summary>
-    public T? Deserialize<T>(string iniFileContent, IniDeserializationOptions? options = null)
-        => (T)Deserialize(new IniFile(iniFileContent.ToStream()), typeof(T), options);
+    public T Deserialize<T>(string iniFileContent, IniDeserializationOptions? options = null)
+    {
+        return (T)Deserialize(new IniFile(iniFileContent.ToStream()), typeof(T), options);
+    }
 
     /// <summary>
     /// Deserializes string as ini file to the object of the specific class.
     /// </summary>
-    public object? Deserialize(string iniFileContent, Type type, IniDeserializationOptions? options = null)
-        => Deserialize(new IniFile(iniFileContent.ToStream()), type, options);
+    public object Deserialize(string iniFileContent, Type type, IniDeserializationOptions? options = null)
+    {
+        return Deserialize(new IniFile(iniFileContent.ToStream()), type, options);
+    }
 
     /// <summary>
     /// Deserializes ini file to the object of the specific class.
     /// </summary>
-    public T? Deserialize<T>(IniFile ini, IniDeserializationOptions? options = null)
-        => (T)Deserialize(ini, typeof(T), options);
+    public T Deserialize<T>(IniFile ini, IniDeserializationOptions? options = null)
+    {
+        return (T)Deserialize(ini, typeof(T), options);
+    }
 
     /// <summary>
     /// Deserializes ini file to the object of the specific class.
     /// </summary>
-    public object? Deserialize(IniFile ini, Type type, IniDeserializationOptions? options = null)
+    public object Deserialize(IniFile ini, Type type, IniDeserializationOptions? options = null)
     {
         IniDeserializationOptions settings = options ?? (DefaultDeserializationOptions with { SectionName = type.Name });
 
@@ -70,16 +74,20 @@ public class IniSerializer(IConversions converter)
     /// <summary>
     /// Deserializes ini section to the object of the specific class.
     /// </summary>
-    public T? Deserialize<T>(IniSection section, IniDeserializationOptions? options = null)
-        => (T)DeserializeSection(section, typeof(T), options);
+    public T Deserialize<T>(IniSection section, IniDeserializationOptions? options = null)
+    {
+        return (T)DeserializeSection(section, typeof(T), options);
+    }
 
     /// <summary>
     /// Deserializes ini section to the object of the specific class.
     /// </summary>
-    public object? Deserialize(IniSection section, Type type, IniDeserializationOptions options)
-        => DeserializeSection(section, type, options);
+    public object Deserialize(IniSection section, Type type, IniDeserializationOptions options)
+    {
+        return DeserializeSection(section, type, options);
+    }
 
-    private object? DeserializeSection(IniSection section, Type type, IniDeserializationOptions? options)
+    private object DeserializeSection(IniSection section, Type type, IniDeserializationOptions? options)
     {
         var settings = options ?? DefaultDeserializationOptions;
 
@@ -120,7 +128,10 @@ public class IniSerializer(IConversions converter)
     /// <param name="data"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    public string Serialize<T>(T data, IniSerializationOptions? options = null) => Serialize(data, typeof(T), options);
+    public string Serialize<T>(T data, IniSerializationOptions? options = null)
+    {
+        return Serialize(data, typeof(T), options);
+    }
 
     /// <summary>
     /// Serializes class to ini-formated string.
