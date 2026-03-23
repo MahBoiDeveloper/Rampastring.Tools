@@ -95,13 +95,20 @@ public class IniSerializer(IConversions converter)
 
         foreach (var property in type.GetProperties())
         {
-            if (settings.IgnoreProperties.Contains(property.Name))
-                continue;
+            if (settings.IgnoreProperties != null)
+            {
+                if (settings.IgnoreProperties.Contains(property.Name))
+                {
+                    continue;
+                }
+            }
 
             string value = section.GetStringValue(property.Name, string.Empty);
 
             if (settings.SkipEmptyKeys && string.IsNullOrEmpty(value))
+            {
                 continue;
+            }
 
             try
             {
@@ -110,9 +117,13 @@ public class IniSerializer(IConversions converter)
             catch (ArgumentException ex)
             {
                 if (settings.SkipUnableToParseTypes)
+                {
                     continue;
+                }
                 else
+                {
                     throw ex;
+                }
             }
         }
 
@@ -149,14 +160,21 @@ public class IniSerializer(IConversions converter)
 
         foreach (var property in type.GetProperties())
         {
-            if (settings.IgnoreProperties.Contains(property.Name))
-                continue;
+            if (settings.IgnoreProperties != null)
+            {
+                if (settings.IgnoreProperties.Contains(property.Name))
+                {
+                    continue;
+                }
+            }
 
             var propertyType = property.GetType();
             var propertyValue = property.GetValue(data);
 
             if (!settings.WriteEmptyKeys && propertyValue == null)
+            {
                 continue;
+            }
 
             ret.AppendLine($"{property.Name}={(propertyValue ?? string.Empty).ToString()}");
         }
