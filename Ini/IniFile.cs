@@ -7,7 +7,7 @@ using System.IO;
 using System.Globalization;
 using System.Text;
 
-namespace Rampastring.Tools;
+namespace Rampastring.Tools.Ini;
 
 /// <summary>
 /// A class for parsing, handling and writing INI files.

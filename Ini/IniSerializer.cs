@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Text;
-
 using Rampastring.Tools.Extensions;
 
-namespace Rampastring.Tools;
+namespace Rampastring.Tools.Ini;
 
 /// <summary>
 /// Provides functionality to serialize objects or value types to INI and to deserialize INI into objects or value types.

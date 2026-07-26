@@ -1,4 +1,6 @@
-﻿namespace Rampastring.Tools.INIProperties;
+﻿using Rampastring.Tools.Ini;
+
+namespace Rampastring.Tools.Ini.INIProperties;
 
 public abstract class GenericINIProperty<T> : IIniProperty
 {

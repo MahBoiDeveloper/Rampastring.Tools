@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Rampastring.Tools;
+namespace Rampastring.Tools.Ini;
 
 public interface IIniFile
 {

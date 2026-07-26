@@ -7,7 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime;
 
-namespace Rampastring.Tools;
+namespace Rampastring.Tools.Ini;
 
 /// <summary>
 /// Represents a [section] in an INI file.

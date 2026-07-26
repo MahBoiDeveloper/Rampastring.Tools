@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Rampastring.Tools;
+namespace Rampastring.Tools.Ini;
 
 public class IniParseException : Exception
 {
