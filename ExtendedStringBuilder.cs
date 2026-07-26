@@ -63,6 +63,7 @@ public class ExtendedStringBuilder : ISerializable
         stringBuilder.Remove(startIndex, length);
     }
 
+    /// <inheritdoc/>
     public override string ToString()
     {
         if (!UseSeparator || stringBuilder.Length == 0)
@@ -71,6 +72,7 @@ public class ExtendedStringBuilder : ISerializable
         return stringBuilder.ToString(0, stringBuilder.Length - 1);
     }
 
+    /// <inheritdoc/>
     public void GetObjectData(SerializationInfo info, StreamingContext context)
     {
         ((ISerializable)stringBuilder).GetObjectData(info, context);

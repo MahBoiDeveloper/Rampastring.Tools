@@ -1,6 +1,6 @@
 ﻿using Rampastring.Tools.Ini;
 
-namespace Rampastring.Tools.Ini.INIProperties;
+namespace Rampastring.Tools.Ini.Properties;
 
 /// <summary>
 /// A string to be parsed from an INI file.
