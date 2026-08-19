@@ -54,7 +54,7 @@ public class IniFile : IIniFile
     /// <param name="applyBaseIni">Whether to parse potential INI file that the file is based on.</param>
     public IniFile(string filePath, bool applyBaseIni = true)
     {
-        FileName = filePath;
+        FilePath = filePath;
 
         Parse(applyBaseIni);
     }
@@ -67,7 +67,7 @@ public class IniFile : IIniFile
     /// <param name="applyBaseIni">Whether to parse potential INI file that the file is based on.</param>
     public IniFile(string filePath, Encoding encoding, bool applyBaseIni = true)
     {
-        FileName = filePath;
+        FilePath = filePath;
         Encoding = encoding;
 
         Parse(applyBaseIni);
@@ -96,7 +96,21 @@ public class IniFile : IIniFile
         ParseIniFile(stream, encoding, applyBaseIni);
     }
 
-    public string FileName { get; set; }
+    /// <summary>
+    /// The path to the INI file on the file system, if any.
+    /// </summary>
+    public string FilePath { get; set; }
+
+    /// <summary>
+    /// Use <see cref="FilePath"/> instead.
+    /// </summary>
+    [Obsolete("Use FilePath instead.")]
+    public string FileName
+    {
+        get => FilePath;
+        set => FilePath = value;
+    }
+
     public Encoding Encoding { get; set; } = new UTF8Encoding(false);
 
     /// <summary>
@@ -230,8 +244,7 @@ public class IniFile : IIniFile
 
         if (stringBuilder.Length > 0)
         {
-            stringBuilder.Remove(stringBuilder.Length - Environment.NewLine.Length,
-                Environment.NewLine.Length);
+            stringBuilder.Remove(stringBuilder.Length - Environment.NewLine.Length, Environment.NewLine.Length);
         }
 
         return stringBuilder.ToString();
