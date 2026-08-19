@@ -8,6 +8,12 @@ namespace Rampastring.Tools.IniSettings;
 /// </summary>
 public class IniSettings
 {
+    /// <summary>
+    /// Parameterless constructor.
+    /// If you use this, make sure to set <see cref="SettingsIni"/> afterwards in derived class constructors.
+    /// </summary>
+    protected IniSettings() { }
+
     public IniSettings(IniFile iniFile)
     {
         SettingsIni = iniFile;
@@ -21,7 +27,7 @@ public class IniSettings
     /// <summary>
     /// The INI file associated with this settings instance.
     /// </summary>
-    public IniFile SettingsIni { get; }
+    public IniFile SettingsIni { get; protected set; }
 
     private readonly List<IIniLoadable> settingList = new List<IIniLoadable>();
 
