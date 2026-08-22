@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 
 namespace Rampastring.Tools;
 
@@ -261,5 +262,19 @@ public class IniSection : IIniSection
     public bool KeyExists(string key)
     {
         return Keys.FindIndex(k => k.Key == key) > -1;
+    }
+
+    /// <summary>
+    /// Creates and returns a deep clone of this INI section.
+    /// </summary>
+    /// <param name="clonedSectionName">The name given to the cloned section.</param>
+    public IniSection Clone(string clonedSectionName)
+    {
+        var clone = (IniSection)MemberwiseClone();
+        clone.SectionName = clonedSectionName;
+
+        // We don't need to do anything for the keys themselves because strings are immutable - just clone the list.
+        clone.Keys = Keys.ToList();
+        return clone;
     }
 }
