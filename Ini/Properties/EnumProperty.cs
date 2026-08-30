@@ -1,7 +1,6 @@
-﻿using Rampastring.Tools.Ini;
-using System;
+﻿using System;
 
-namespace Rampastring.Tools.Ini.Properties;
+namespace Rampastring.Tools.INIProperties;
 
 public class EnumProperty<T> : GenericINIProperty<T>, IIniProperty
 {

@@ -1,10 +1,11 @@
-﻿// Rampastring's INI parser
+// Rampastring's INI parser
 // http://www.moddb.com/members/rampastring
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 
 namespace Rampastring.Tools.Ini;
 
@@ -23,14 +24,6 @@ public class IniSection : IIniSection
     public string SectionName { get; set; }
     public List<KeyValuePair<string, string>> Keys = new List<KeyValuePair<string, string>>();
 
-    /// <summary>
-    /// Adds a key to the INI section.
-    /// Throws a <see cref="InvalidOperationException"/> if the key already exists.
-    /// Use <see cref="AddOrReplaceKey(string, string)"/> if you want to replace
-    /// an existing key instead.
-    /// </summary>
-    /// <param name="keyName">The name of the INI key.</param>
-    /// <param name="value">The value of the INI key.</param>
     public void AddKey(string keyName, string value)
     {
         if (keyName == null || value == null)
@@ -42,12 +35,6 @@ public class IniSection : IIniSection
         Keys.Add(new KeyValuePair<string, string>(keyName, value));
     }
 
-    /// <summary>
-    /// Adds a key to the INI section, or replaces the key's value if the key
-    /// already exists.
-    /// </summary>
-    /// <param name="keyName">The name of the INI key.</param>
-    /// <param name="value">The value of the INI key.</param>
     public void AddOrReplaceKey(string keyName, string value)
     {
         if (keyName == null || value == null)
@@ -60,11 +47,6 @@ public class IniSection : IIniSection
             Keys.Add(new KeyValuePair<string, string>(keyName, value));
     }
 
-    /// <summary>
-    /// Removes a key from the INI section.
-    /// Does not throw an exception if the key does not exist.
-    /// </summary>
-    /// <param name="keyName">The name of the INI key to remove.</param>
     public void RemoveKey(string keyName)
     {
         int index = Keys.FindIndex(k => k.Key == keyName);
@@ -72,12 +54,6 @@ public class IniSection : IIniSection
             Keys.RemoveAt(index);
     }
 
-    /// <summary>
-    /// Returns a string value from the INI section.
-    /// </summary>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="defaultValue">The value to return if the section or key wasn't found.</param>
-    /// <returns>The given key's value if the section and key was found. Otherwise the given defaultValue.</returns>
     public string GetStringValue(string key, string defaultValue)
     {
         var kvp = Keys.Find(k => k.Key == key);
@@ -88,43 +64,19 @@ public class IniSection : IIniSection
         return kvp.Value;
     }
 
-    /// <summary>
-    /// Returns an integer value from the INI section.
-    /// </summary>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="defaultValue">The value to return if the section or key wasn't found,
-    /// or converting the key's value to an integer failed.</param>
-    /// <returns>The given key's value if the section and key was found and
-    /// the value is a valid integer. Otherwise the given defaultValue.</returns>
     public int GetIntValue(string key, int defaultValue)
     {
         return Conversions.IntFromString(GetStringValue(key, string.Empty), defaultValue);
     }
 
-    /// <summary>
-    /// Returns a double-precision floating point value from the INI section.
-    /// </summary>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="defaultValue">The value to return if the section or key wasn't found,
-    /// or converting the key's value to a double failed.</param>
-    /// <returns>The given key's value if the section and key was found and
-    /// the value is a valid double. Otherwise the given defaultValue.</returns>
     public double GetDoubleValue(string key, double defaultValue)
     {
         return Conversions.DoubleFromString(GetStringValue(key, string.Empty), defaultValue);
     }
 
-    /// <summary>
-    /// Returns a single-precision floating point value from the INI section.
-    /// </summary>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="defaultValue">The value to return if the section or key wasn't found,
-    /// or converting the key's value to a float failed.</param>
-    /// <returns>The given key's value if the section and key was found and
-    /// the value is a valid float. Otherwise the given defaultValue.</returns>
     public float GetSingleValue(string key, float defaultValue)
     {
-        return Conversions.FloatFromString(GetStringValue(key, String.Empty), defaultValue);
+        return Conversions.FloatFromString(GetStringValue(key, string.Empty), defaultValue);
     }
 
     /// <summary>
@@ -160,86 +112,37 @@ public class IniSection : IIniSection
         AddOrReplaceKey(key, value);
     }
 
-    /// <summary>
-    /// Sets the integer value of a key in the INI section.
-    /// If the key doesn't exist, it is created.
-    /// </summary>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="value">The value of the INI key.</param>
     public void SetIntValue(string key, int value)
     {
-        AddOrReplaceKey(key, value.ToString());
+        AddOrReplaceKey(key, value.ToString(CultureInfo.InvariantCulture));
     }
 
-    /// <summary>
-    /// Sets the double-precision floating point value of a key in the INI section.
-    /// If the key doesn't exist, it is created.
-    /// </summary>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="value">The value of the INI key.</param>
     public void SetDoubleValue(string key, double value)
     {
         AddOrReplaceKey(key, value.ToString(CultureInfo.InvariantCulture));
     }
 
-    /// <summary>
-    /// Sets the single-precision floating point value of a key in the INI section.
-    /// If the key doesn't exist, it is created.
-    /// </summary>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="value">The value of the INI key.</param>
     public void SetFloatValue(string key, float value)
     {
         AddOrReplaceKey(key, value.ToString(CultureInfo.InvariantCulture));
     }
 
-    /// <summary>
-    /// Sets the boolean value of a key in the INI section.
-    /// If the key doesn't exist, it is created.
-    /// Uses the <see cref="BooleanStringStyle.TRUEFALSE"/> boolean string style.
-    /// </summary>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="value">The value of the INI key.</param>
     public void SetBooleanValue(string key, bool value)
     {
         SetBooleanValue(key, value, BooleanStringStyle.TRUEFALSE);
     }
 
-    /// <summary>
-    /// Sets the boolean value of a key in the INI section.
-    /// If the key doesn't exist, it is created.
-    /// </summary>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="value">The value of the INI key.</param>
-    /// <param name="booleanStringStyle">The boolean string style.</param>
     public void SetBooleanValue(string key, bool value, BooleanStringStyle booleanStringStyle)
     {
         string strValue = Conversions.BooleanToString(value, booleanStringStyle);
         AddOrReplaceKey(key, strValue);
     }
 
-    /// <summary>
-    /// Returns a boolean value from the INI section.
-    /// </summary>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="defaultValue">The value to return if the section or key wasn't found,
-    /// or converting the key's value to a boolean failed.</param>
-    /// <returns>The given key's value if the section and key was found and
-    /// the value is a valid boolean. Otherwise the given defaultValue.</returns>
     public bool GetBooleanValue(string key, bool defaultValue)
     {
         return Conversions.BooleanFromString(GetStringValue(key, String.Empty), defaultValue);
     }
 
-    /// <summary>
-    /// Sets the list value of a key in the INI section.
-    /// The list elements are converted to strings using the list element's
-    /// ToString method and the given separator is applied between the elements.
-    /// </summary>
-    /// <typeparam name="T">The type of the list elements.</typeparam>
-    /// <param name="key">The INI key.</param>
-    /// <param name="list">The list.</param>
-    /// <param name="separator">The separator between list elements.</param>
     public void SetListValue<T>(string key, List<T> list, char separator)
     {
         AddOrReplaceKey(key, string.Join(separator.ToString(), list));
@@ -305,14 +208,26 @@ public class IniSection : IIniSection
         return list;
     }
 
-    /// <summary>
-    /// Parses and returns a path string from the INI section.
-    /// The path string has all of its directory separators ( / \ )
-    /// replaced with an environment-specific one.
-    /// </summary>
     public string GetPathStringValue(string key, string defaultValue)
     {
         return GetStringValue(key, defaultValue).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
+    }
+
+    public T GetEnumValue<T>(string key, T defaultValue) where T : struct, Enum
+    {
+        string value = GetStringValue(key, null);
+        if (string.IsNullOrWhiteSpace(value))
+            return defaultValue;
+
+        if (Enum.TryParse(value, true, out T result))
+            return result;
+
+        return defaultValue;
+    }
+
+    public void SetEnumValue<T>(string key, T value) where T : struct, Enum
+    {
+        SetStringValue(key, value.ToString());
     }
 
     /// <summary>
@@ -323,5 +238,19 @@ public class IniSection : IIniSection
     public bool KeyExists(string key)
     {
         return Keys.FindIndex(k => k.Key == key) > -1;
+    }
+
+    /// <summary>
+    /// Creates and returns a deep clone of this INI section.
+    /// </summary>
+    /// <param name="clonedSectionName">The name given to the cloned section.</param>
+    public IniSection Clone(string clonedSectionName)
+    {
+        var clone = (IniSection)MemberwiseClone();
+        clone.SectionName = clonedSectionName;
+
+        // We don't need to do anything for the keys themselves because strings are immutable - just clone the list.
+        clone.Keys = Keys.ToList();
+        return clone;
     }
 }

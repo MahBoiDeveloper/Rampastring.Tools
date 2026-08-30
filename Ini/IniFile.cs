@@ -1,4 +1,4 @@
-﻿// Rampastring's INI parser
+// Rampastring's INI parser
 // http://www.moddb.com/members/rampastring
 
 using System;
@@ -9,9 +9,6 @@ using System.Text;
 
 namespace Rampastring.Tools.Ini;
 
-/// <summary>
-/// A class for parsing, handling and writing INI files.
-/// </summary>
 public class IniFile : IIniFile
 {
     private const string TextBlockBeginIdentifier = "$$$TextBlockBegin$$$";
@@ -54,7 +51,7 @@ public class IniFile : IIniFile
     /// <param name="applyBaseIni">Whether to parse potential INI file that the file is based on.</param>
     public IniFile(string filePath, bool applyBaseIni = true)
     {
-        FileName = filePath;
+        FilePath = filePath;
 
         Parse(applyBaseIni);
     }
@@ -67,7 +64,7 @@ public class IniFile : IIniFile
     /// <param name="applyBaseIni">Whether to parse potential INI file that the file is based on.</param>
     public IniFile(string filePath, Encoding encoding, bool applyBaseIni = true)
     {
-        FileName = filePath;
+        FilePath = filePath;
         Encoding = encoding;
 
         Parse(applyBaseIni);
@@ -96,13 +93,20 @@ public class IniFile : IIniFile
         ParseIniFile(stream, encoding, applyBaseIni);
     }
 
-    public string FileName { get; set; }
+    /// <summary>
+    /// The path to the INI file on the file system, if any.
+    /// </summary>
+    public string FilePath { get; set; }
+
+    [Obsolete("Use FilePath instead.")]
+    public string FileName
+    {
+        get => FilePath;
+        set => FilePath = value;
+    }
+
     public Encoding Encoding { get; set; } = new UTF8Encoding(false);
 
-    /// <summary>
-    /// Gets or sets a value that determines whether the parser should only parse 
-    /// pre-determined (via <see cref="AddSection(string)"/>) sections or all sections in the INI file.
-    /// </summary>
     public bool AllowNewSections { get; set; } = true;
 
     /// <summary>
@@ -125,9 +129,6 @@ public class IniFile : IIniFile
         ParseIniFile(stream, null, applyBaseIni);
     }
 
-    /// <summary>
-    /// Clears all data from this IniFile instance and then re-parses the input INI file.
-    /// </summary>
     public void Reload()
     {
         _lastSectionIndex = 0;
@@ -230,8 +231,7 @@ public class IniFile : IIniFile
 
         if (stringBuilder.Length > 0)
         {
-            stringBuilder.Remove(stringBuilder.Length - Environment.NewLine.Length,
-                Environment.NewLine.Length);
+            stringBuilder.Remove(stringBuilder.Length - Environment.NewLine.Length, Environment.NewLine.Length);
         }
 
         return stringBuilder.ToString();
@@ -261,19 +261,11 @@ public class IniFile : IIniFile
         }
     }
 
-    /// <summary>
-    /// Writes the INI file to the path that was
-    /// given to the instance on creation.
-    /// </summary>
     public void WriteIniFile()
     {
         WriteIniFile(FileName);
     }
 
-    /// <summary>
-    /// Writes the INI file to a specified stream.
-    /// </summary>
-    /// <param name="stream">The stream to write the INI file to.</param>
     public void WriteIniStream(Stream stream)
     {
         WriteIniStream(stream, Encoding);
@@ -307,10 +299,6 @@ public class IniFile : IIniFile
         sw.Write("\r\n");
     }
 
-    /// <summary>
-    /// Writes the INI file's contents to the specified path.
-    /// </summary>
-    /// <param name="filePath">The path of the file to write to.</param>
     public void WriteIniFile(string filePath)
     {
         FileInfo fileInfo = SafePath.GetFile(filePath);
@@ -323,29 +311,16 @@ public class IniFile : IIniFile
         WriteIniStream(stream);
     }
 
-    /// <summary>
-    /// Creates and adds a section into the INI file.
-    /// </summary>
-    /// <param name="sectionName">The name of the section to add.</param>
     public void AddSection(string sectionName)
     {
         Sections.Add(new IniSection(sectionName));
     }
 
-    /// <summary>
-    /// Adds a section into the INI file.
-    /// </summary>
-    /// <param name="section">The section to add.</param>
     public void AddSection(IniSection section)
     {
         Sections.Add(section);
     }
 
-    /// <summary>
-    /// Removes the given section from the INI file.
-    /// Uses case-insensitive string comparison when looking for the section.
-    /// </summary>
-    /// <param name="sectionName">The name of the section to remove.</param>
     public void RemoveSection(string sectionName)
     {
         int index = Sections.FindIndex(section =>
@@ -373,11 +348,6 @@ public class IniFile : IIniFile
         Sections.Insert(0, section);
     }
 
-    /// <summary>
-    /// Erases all existing keys of a section.
-    /// Does nothing if the section does not exist.
-    /// </summary>
-    /// <param name="sectionName">The name of the section.</param>
     public void EraseSectionKeys(string sectionName)
     {
         int index = Sections.FindIndex(s => s.SectionName == sectionName);
@@ -388,13 +358,6 @@ public class IniFile : IIniFile
         Sections[index].Keys.Clear();
     }
 
-    /// <summary>
-    /// Combines two INI sections, with the second section overriding 
-    /// in case conflicting keys are present. The combined section
-    /// then over-writes the second section.
-    /// </summary>
-    /// <param name="firstSectionName">The name of the first INI section.</param>
-    /// <param name="secondSectionName">The name of the second INI section.</param>
     public void CombineSections(string firstSectionName, string secondSectionName)
     {
         int firstIndex = Sections.FindIndex(s => s.SectionName == firstSectionName);
@@ -428,13 +391,6 @@ public class IniFile : IIniFile
         Sections[secondIndex] = newSection;
     }
 
-    /// <summary>
-    /// Returns a string value from the INI file.
-    /// </summary>
-    /// <param name="section">The name of the key's section.</param>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="defaultValue">The value to return if the section or key wasn't found.</param>
-    /// <returns>The given key's value if the section and key was found. Otherwise the given defaultValue.</returns>
     public string GetStringValue(string section, string key, string defaultValue)
     {
         IniSection iniSection = GetSection(section);
@@ -467,71 +423,26 @@ public class IniFile : IIniFile
         }
     }
 
-    /// <summary>
-    /// Returns an integer value from the INI file.
-    /// </summary>
-    /// <param name="section">The name of the key's section.</param>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="defaultValue">The value to return if the section or key wasn't found,
-    /// or converting the key's value to an integer failed.</param>
-    /// <returns>The given key's value if the section and key was found and
-    /// the value is a valid integer. Otherwise the given defaultValue.</returns>
     public int GetIntValue(string section, string key, int defaultValue)
     {
         return Conversions.IntFromString(GetStringValue(section, key, null), defaultValue);
     }
 
-    /// <summary>
-    /// Returns a double-precision floating point value from the INI file.
-    /// </summary>
-    /// <param name="section">The name of the key's section.</param>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="defaultValue">The value to return if the section or key wasn't found,
-    /// or converting the key's value to a double failed.</param>
-    /// <returns>The given key's value if the section and key was found and
-    /// the value is a valid double. Otherwise the given defaultValue.</returns>
     public double GetDoubleValue(string section, string key, double defaultValue)
     {
         return Conversions.DoubleFromString(GetStringValue(section, key, String.Empty), defaultValue);
     }
 
-    /// <summary>
-    /// Returns a single-precision floating point value from the INI file.
-    /// </summary>
-    /// <param name="section">The name of the key's section.</param>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="defaultValue">The value to return if the section or key wasn't found,
-    /// or converting the key's value to a float failed.</param>
-    /// <returns>The given key's value if the section and key was found and
-    /// the value is a valid float. Otherwise the given defaultValue.</returns>
     public float GetSingleValue(string section, string key, float defaultValue)
     {
         return Conversions.FloatFromString(GetStringValue(section, key, String.Empty), defaultValue);
     }
 
-    /// <summary>
-    /// Returns a boolean value from the INI file.
-    /// </summary>
-    /// <param name="section">The name of the key's section.</param>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="defaultValue">The value to return if the section or key wasn't found,
-    /// or converting the key's value to a boolean failed.</param>
-    /// <returns>The given key's value if the section and key was found and
-    /// the value is a valid boolean. Otherwise the given defaultValue.</returns>
     public bool GetBooleanValue(string section, string key, bool defaultValue)
     {
         return Conversions.BooleanFromString(GetStringValue(section, key, String.Empty), defaultValue);
     }
 
-    /// <summary>
-    /// Parses and returns a list value in the INI file.
-    /// </summary>
-    /// <typeparam name="T">The type of the list elements.</typeparam>
-    /// <param name="section">The name of the INI section.</param>
-    /// <param name="key">The INI key.</param>
-    /// <param name="separator">The separator between the list elements.</param>
-    /// <param name="converter">The function that converts the list elements from strings to the given type.</param>
-    /// <returns>A list that contains the parsed elements.</returns>
     public List<T> GetListValue<T>(string sectionName, string key, char separator, Func<string, T> converter)
     {
         var section = GetSection(sectionName);
@@ -541,11 +452,6 @@ public class IniFile : IIniFile
         return section.GetListValue(key, separator, converter);
     }
 
-    /// <summary>
-    /// Parses and returns a path string from the INI file.
-    /// The path string has all of its directory separators ( / \ )
-    /// replaced with an environment-specific one.
-    /// </summary>
     public string GetPathStringValue(string section, string key, string defaultValue)
     {
         IniSection iniSection = GetSection(section);
@@ -555,11 +461,20 @@ public class IniFile : IIniFile
         return iniSection.GetPathStringValue(key, defaultValue);
     }
 
-    /// <summary>
-    /// Returns an INI section from the file, or null if the section doesn't exist.
-    /// </summary>
-    /// <param name="name">The name of the section.</param>
-    /// <returns>The section of the file; null if the section doesn't exist.</returns>
+    public T GetEnumValue<T>(string section, string key, T defaultValue) where T : struct, Enum
+    {
+        IniSection iniSection = GetSection(section);
+        if (iniSection == null)
+            return defaultValue;
+
+        return iniSection.GetEnumValue(key, defaultValue);
+    }
+
+    public void SetEnumValue<T>(string section, string key, T value) where T : struct, Enum
+    {
+        SetStringValue(section, key, value.ToString());
+    }
+
     public IniSection GetSection(string name)
     {
         for (int i = _lastSectionIndex; i < Sections.Count; i++)
@@ -583,12 +498,6 @@ public class IniFile : IIniFile
         return Sections[sectionId];
     }
 
-    /// <summary>
-    /// Sets the string value of a specific key of a specific section in the INI file.
-    /// </summary>
-    /// <param name="section">The name of the key's section.</param>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="value">The value to set to the key.</param>
     public void SetStringValue(string section, string key, string value)
     {
         var iniSection = Sections.Find(s => s.SectionName == section);
@@ -601,12 +510,6 @@ public class IniFile : IIniFile
         iniSection.SetStringValue(key, value);
     }
 
-    /// <summary>
-    /// Sets the integer value of a specific key of a specific section in the INI file.
-    /// </summary>
-    /// <param name="section">The name of the key's section.</param>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="value">The value to set to the key.</param>
     public void SetIntValue(string section, string key, int value)
     {
         var iniSection = Sections.Find(s => s.SectionName == section);
@@ -619,12 +522,6 @@ public class IniFile : IIniFile
         iniSection.SetIntValue(key, value);
     }
 
-    /// <summary>
-    /// Sets the double value of a specific key of a specific section in the INI file.
-    /// </summary>
-    /// <param name="section">The name of the key's section.</param>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="value">The value to set to the key.</param>
     public void SetDoubleValue(string section, string key, double value)
     {
         var iniSection = Sections.Find(s => s.SectionName == section);
@@ -647,13 +544,6 @@ public class IniFile : IIniFile
         SetSingleValue(section, key, Convert.ToSingle(value), decimals);
     }
 
-    /// <summary>
-    /// Sets the float value of a key in the INI file.
-    /// </summary>
-    /// <param name="section">The name of the key's section.</param>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="value">The value to set to the key.</param>
-    /// <param name="decimals">Defines how many decimal places the stringified float should have.</param>
     public void SetSingleValue(string section, string key, float value, int decimals)
     {
         string stringValue = value.ToString("N" + decimals, CultureInfo.GetCultureInfo("en-US").NumberFormat);
@@ -667,12 +557,6 @@ public class IniFile : IIniFile
         iniSection.SetStringValue(key, stringValue);
     }
 
-    /// <summary>
-    /// Sets the boolean value of a key in the INI file.
-    /// </summary>
-    /// <param name="section">The name of the key's section.</param>
-    /// <param name="key">The name of the INI key.</param>
-    /// <param name="value">The value to set to the key.</param>
     public void SetBooleanValue(string section, string key, bool value)
     {
         var iniSection = Sections.Find(s => s.SectionName == section);
@@ -685,16 +569,6 @@ public class IniFile : IIniFile
         iniSection.SetBooleanValue(key, value);
     }
 
-    /// <summary>
-    /// Sets the list value of a key in the INI section.
-    /// The list elements are converted to strings using the list element's
-    /// ToString method and the given separator is applied between the elements.
-    /// </summary>
-    /// <typeparam name="T">The type of the list elements.</typeparam>
-    /// <param name="section">The INI section.</param>
-    /// <param name="key">The INI key.</param>
-    /// <param name="list">The list.</param>
-    /// <param name="separator">The separator between list elements.</param>
     public void SetListValue<T>(string section, string key, List<T> list, char separator)
     {
         var iniSection = Sections.Find(s => s.SectionName == section);
@@ -707,9 +581,6 @@ public class IniFile : IIniFile
         iniSection.SetListValue(key, list, separator);
     }
 
-    /// <summary>
-    /// Gets the names of all INI keys in the specified INI section.
-    /// </summary>
     public List<string> GetSectionKeys(string sectionName)
     {
         IniSection section = Sections.Find(c => c.SectionName == sectionName);
@@ -724,9 +595,6 @@ public class IniFile : IIniFile
         return returnValue;
     }
 
-    /// <summary>
-    /// Gets the names of all sections in the INI file.
-    /// </summary>
     public List<string> GetSections()
     {
         List<string> sectionList = new List<string>();
@@ -736,23 +604,11 @@ public class IniFile : IIniFile
         return sectionList;
     }
 
-    /// <summary>
-    /// Checks whether a section exists. Returns true if the section
-    /// exists, otherwise returns false.
-    /// </summary>
-    /// <param name="sectionName">The name of the INI section.</param>
-    /// <returns></returns>
     public bool SectionExists(string sectionName)
     {
         return Sections.FindIndex(c => c.SectionName == sectionName) != -1;
     }
 
-    /// <summary>
-    /// Checks whether a specific INI key exists in a specific INI section.
-    /// </summary>
-    /// <param name="sectionName">The name of the INI section.</param>
-    /// <param name="keyName">The name of the INI key.</param>
-    /// <returns>True if the key exists, otherwise false.</returns>
     public bool KeyExists(string sectionName, string keyName)
     {
         IniSection section = GetSection(sectionName);
@@ -762,11 +618,6 @@ public class IniFile : IIniFile
         return section.KeyExists(keyName);
     }
 
-    /// <summary>
-    /// Removes a key from the given section in the INI file.
-    /// </summary>
-    /// <param name="sectionName">The name of the section to remove the key from.</param>
-    /// <param name="key">The key to remove from the section.</param>
     public void RemoveKey(string sectionName, string key)
     {
         var section = GetSection(sectionName);

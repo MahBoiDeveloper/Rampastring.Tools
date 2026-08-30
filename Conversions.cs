@@ -175,7 +175,7 @@ public class Conversions : IConversions
         {
             return Convert.ToDouble(str, CultureInfo.GetCultureInfo("en-US").NumberFormat);
         }
-        catch
+        catch (Exception _) when (_ is FormatException or OverflowException)
         {
             return defaultValue;
         }
@@ -198,7 +198,7 @@ public class Conversions : IConversions
         {
             return int.Parse(str, CultureInfo.InvariantCulture);
         }
-        catch
+        catch (Exception _) when (_ is FormatException or OverflowException)
         {
             return defaultValue;
         }
